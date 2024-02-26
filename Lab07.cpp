@@ -6,7 +6,7 @@
  * 3. Assignment Description:
  *      Simulate firing the M777 howitzer 15mm artillery piece
  * 4. What was the hardest part? Be as specific as possible.
- *      ??
+ *      Setting up the program/getting it started. 
  * 5. How long did it take for you to complete the assignment?
  *      ??
  *****************************************************************/
@@ -18,6 +18,8 @@
 #include "uiDraw.h"     // for RANDOM and DRAW*
 #include "ground.h"     // for GROUND
 #include "position.h"   // for POSITION
+#include <map>          // for linear interpolation
+#include <math.h>       // for PI, sin, and cos
 using namespace std;
 
 #define INITIAL_VELOCITY 827.0
@@ -25,6 +27,7 @@ using namespace std;
 #define DIAMETER 0.15489
 #define RADIUS 0.077445
 #define GRAVITY -9.80665
+#define TIME 0.01
 
 /*************************************************************************
  * Demo
@@ -57,107 +60,7 @@ public:
          projectilePath[i].setPixelsY(ptUpperRight.getPixelsY() / 1.5);
       }
    }
-
-  
-
-
-   /**************************************************
-* CONVERT DEGREES TO RADIANS
-//* Input: Angle in degrees
-//* Output: Angle in radians
-//**************************************************/
-   double convertToRadians()
-   {
-      radians = (angle / 360.0) * 2 * M_PI;
-      return radians;
-   }
-
-   ///**************************************************
-   //* COMPUTE HORIZONTAL VELOCITY
-   //* Input: Initial velocity
-   //* Output: dx
-   //**************************************************/
-   double computeHorizontalVelocity()
-   {
-      double dx = cos(radians) * INITIAL_VELOCITY; // If we get the wrong x, y (distance, altitude), apply m*a
-      return dx;
-   }
-
-   ///**************************************************
-   //* COMPUTE VERTICAL VELOCITY
-   //* Input: Initial velocity
-   //* Output: dy
-   /**************************************************/
-   double computeVerticalVelocity()
-   {
-      dy = sin(radians) * INITIAL_VELOCITY; 
-      return dy; 
-   }
-   /**********************************************
-   *COMPUTE FORCE
-   *
-   **********************************************/
-   double computeForce()
-   {
-      force = 0.5 * (drag * density * velocity * velocity * area);
-      return force;
-   }
-
-   /**********************************************
-   *COMPUTE DECELRATION
-   *
-   **********************************************/
-   double computeDeceleration()
-   {
-      deceleration = force / MASS; 
-      return deceleration;
-   }
-
-   /*********************************************
-   * COMPUTE NEW POSITION
-   *
-   *********************************************/
-   double computeAltitude()
-   {
-      y = y + 214.043 + 0/*dy * time + 0.5 * (ddy * time * time)*/;
-      return y;
-   }
-   double computeDistance()
-   {
-      x = x + 798.821 + 0/*dx * time + 0.5 * (ddx * time * time)*/;
-      return x; 
-   }
-
-   /*********************************************
-   * COMPUTE NEW VELOCITY
-   *
-   *********************************************/
-   void computeNewVelocity()
-   {
-      dx = dx + ddx * time;
-      dy = dy + ddy * time;
-   }
-
-   /*******************************************
-   *COMPUTE ACCELERATION
-   *
-   *******************************************/
-   void computeAcceleration()
-   {
-      ddx = -sin(angle) * deceleration;
-      ddy = GRAVITY - cos(angle) * deceleration;
-   }
-   /*******************************************
-   *COMPUTE AREA
-   *
-   *******************************************/
-   double computeArea()
-   {
-      area = M_PI * RADIUS * RADIUS;
-      return area; 
-   }
-   double getMetersX()       { return x; }
-   double getMetersY()       { return y; } 
+ 
 
    Ground ground;                 // the ground
    Position  projectilePath[20];  // path of the projectile
@@ -219,21 +122,6 @@ void callBack(const Interface* pUI, void* p)
    //
    // perform all the game logic
    //
-
-   pDemo->convertToRadians(); 
-   //pDemo->computeArea(); 
-   //pDemp->computeDensityOfAir();
-   //pDemo->computeVelocityOfSound();
-   pDemo->computeHorizontalVelocity(); 
-   pDemo->computeVerticalVelocity(); 
-   //pDemo->computeForce(); 
-   //pDemo->computeDeceleration(); // This is the order in the video but IDK if we need deceleration (it's just negative acceleration). 
-   //pDemo->computeAcceleration(); 
-   pDemo->computeAltitude();
-   pDemo->computeDistance();
-   pDemo->computeNewVelocity(); 
-   pDemo->getMetersX();
-   pDemo->getMetersY();
   
 
    // advance time by half a second.
@@ -275,7 +163,6 @@ void callBack(const Interface* pUI, void* p)
 
 
 
-
 double Position::metersFromPixels = 40.0;
 
 /*********************************
@@ -289,7 +176,7 @@ int WINAPI wWinMain(
    _In_ PWSTR pCmdLine,
    _In_ int nCmdShow)
 #else // !_WIN32
-int main(int argc, char** argv)
+int main2(int argc, char** argv)
 #endif // !_WIN32
 {
    // Initialize OpenGL
@@ -304,29 +191,8 @@ int main(int argc, char** argv)
    // Initialize the demo
    Demo demo(ptUpperRight);
 
-   // Put loop for Inertia here
 
-   for (int i = 0; i < 20; i++)
-   {
-      double rads = demo.convertToRadians();   
-      //cout << rads << endl;  
-      double hz = demo.computeHorizontalVelocity();  
-      //cout << hz << endl; 
-      double vertV = demo.computeVerticalVelocity();
-      //cout << vertV << endl;
-      double alt = demo.computeAltitude();
-      //cout << alt << endl;
-      double dis = demo.computeDistance();
-      //cout << dis << endl;
-      //demo.computeNewVelocity();  
-      double X = demo.getMetersX();  
-      //cout << X << endl; 
-      double Y = demo.getMetersY();  
-      //cout << Y << endl;  
-   }
-   
-
-   cout << "Distance: " << demo.getMetersX() << " Altitude: " << demo.getMetersY(); 
+   //cout << "Distance: " << demo.getMetersX() << " Altitude: " << demo.getMetersY(); 
 
    //set everything into action
    ui.run(callBack, &demo);
@@ -334,15 +200,16 @@ int main(int argc, char** argv)
 
    return 0;
 }
+
 /*********************************
 *CLASS NOTES:
 *********************************/
-// lINEAR INTERP
+// lINEAR INTERPILATION
 // Only one function that takes 2 coordinate pairs. 
-//inline douvle linear int(double d0, double ro)
+//inline double linear int(double d0, double ro)
 //double range()
 //loop through the array
-//if it's in the range, send it to the function'
+//if it's in the range, send it to the function
 
 
 
@@ -359,6 +226,5 @@ int main(int argc, char** argv)
 // We can do all the code in main if we want. 
 // Good variable names, use functions, no need to use classes. 
 // Drag goes the oppostide direction of the bullet
-// Have the - operator for the angle classs. Use the angle class from the last lab. MAke a function called result
+// Have the - operator for the angle class. Use the angle class from the last lab. Make a function called reverse?
 // Have a .reverse() method?
-// We can make a prototype cla

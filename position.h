@@ -46,7 +46,7 @@ public:
    double getMetersY()       const { return y;                           }
    double getPixelsX()       const { return x / metersFromPixels;        }
    double getPixelsY()       const { return y / metersFromPixels;        }
-   //double getSpeed()         const { return sqrt((dx * dx) + (dy * dy)); }
+   double getSpeed()         const { return sqrt((dx * dx) + (dy * dy)); }
 
    // setters
    void setMeters(double xMeters, double yMeters) {x = xMeters; y = yMeters; }
