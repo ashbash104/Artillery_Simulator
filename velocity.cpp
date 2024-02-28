@@ -34,9 +34,7 @@ Velocity::Velocity(double speed, Angle angle)
 }
 
 /*********************************************
- * VELOCITY : GET SPEED
- * Return the total current velocity
- *    x^2 + y^2 = t^2
+ TOTAL CURRENT VELOCITY
  *********************************************/
 long double Velocity::getSpeed() const
 {
@@ -44,8 +42,7 @@ long double Velocity::getSpeed() const
 }
 
 /*********************************************
- * VELOCITY : ADD VELOCITY
- * vector addition
+ * ADD VELOCITY
  *********************************************/
 void Velocity::addVelocity(const Velocity& v)
 {
@@ -54,9 +51,7 @@ void Velocity::addVelocity(const Velocity& v)
 }
 
 /*********************************************
- * VELOCITY : ADD
- * Given an existing velocity, update it
- * with added acceleration and time
+ * ADD ACCELERATION
  *********************************************/
 void Velocity::addAcceleration(const Acceleration& a, long double t)
 {
@@ -65,9 +60,7 @@ void Velocity::addAcceleration(const Acceleration& a, long double t)
 }
 
 /*********************************************
- * VELOCITY : ADD DX
- * Given an existing velocity, update it
- * with added horizontal velocity
+ * UPDATE VELOCITY WITH DX
  *********************************************/
 void Velocity::addDX(double dx)
 {
@@ -75,9 +68,7 @@ void Velocity::addDX(double dx)
 }
 
 /*********************************************
- * VELOCITY : ADD DY
- * Given an existing vel ocity, update it
- * with added vertical velocity
+ *UPDATE VELOCITY WITH DY
  *********************************************/
 void Velocity::addDY(double dy)
 {

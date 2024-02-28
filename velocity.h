@@ -16,7 +16,6 @@
 
 /*********************************************
  * VELOCITY
- * The speed at which something travels
  *********************************************/
 class Velocity
 {

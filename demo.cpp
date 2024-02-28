@@ -11,8 +11,6 @@
  *      ??
  *****************************************************************/
 
- /*Test: Distance: 15976.4m   Altitude: 4280.88m */
-
 #include <cassert>      // for ASSERT
 #include "uiInteract.h" // for INTERFACE
 #include "uiDraw.h"     // for RANDOM and DRAW*
@@ -34,29 +32,6 @@ using namespace std;
 const double altitude = 0;
 const double drag = 0;
 
-
-
-/////**************************************************
-////* COMPUTE HORIZONTAL VELOCITY
-////* Input: Initial velocity
-////* Output: dx
-////**************************************************/
-//double computeHorizontalVelocity()
-//{
-//   double dx = cos(radians) * INITIAL_VELOCITY; // If we get the wrong x, y (distance, altitude), apply m*a
-//   return dx;
-//}
-//
-/////**************************************************
-////* COMPUTE VERTICAL VELOCITY
-////* Input: Initial velocity
-////* Output: dy
-///**************************************************/
-//double computeVerticalVelocity()
-//{
-//   dy = sin(radians) * INITIAL_VELOCITY;
-//   return dy;
-//}
 /***************************************
 *PROMPT
 * Method to combine cout and cin
@@ -69,6 +44,21 @@ double prompt(const string& message)
    cin >> value;
    return value;
 }
+
+/******************************************
+*LINEAR INTERPOLATION
+* Input: 2 coordinate points
+* Output:
+* Does this need to be a long double?
+*****************************************/
+//double linearInterpolateX(double x0, double y0, double x1, double y1, double x)
+//
+//{
+//   d = ((r - r_0) * (d_1 - d_0) / (r_1 - r_0)) + d_0
+//   
+//   return (((y - y0)) * (x1 - x0) / (y1 - y0)) + x0
+//}
+
 /******************************************
 *LINEAR INTERPOLATION
 * Input: 2 coordinate points
@@ -116,7 +106,7 @@ double lookupValue(const std::map<double, double>& table, const double& value)
 *COMPUTE DRAG COEFFICIENT
 *
 ***********************************************/
-double computeDrag(double drag)
+double computeDrag(double mach)
 {
    std::map<double, double> const dragChart
    {
@@ -125,7 +115,7 @@ double computeDrag(double drag)
       {1.020, 0.4335}, {1.060, 0.4483}, {1.240, 0.4064}, {1.530, 0.3663},
       {1.990, 0.2897}, {2.870, 0.2297}, {2.890, 0.2306}, {5.000, 0.2656}
    };
-   return lookupValue(dragChart, drag);
+   return lookupValue(dragChart, mach);
 }
 
 /*********************************************
@@ -201,21 +191,6 @@ double computeDeceleration(const double& force, const double& mass)
    return force / MASS;
 }
 
-///*********************************************
-//* COMPUTE NEW POSITION
-//*
-//*********************************************/
-//double computeAltitude()
-//{
-//   return y + 214.043 + 0/*dy * time + 0.5 * (ddy * time * time)*/;
-//
-//}
-//// FIX THIS FUNCTION TOO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//double computeDistance()
-//{
-//   return x + dx * time + 0.5 * (ddx * time * time);
-//
-//}
 
 /*********************************
 * CALCULATE ANGLE'Do we even need this?
@@ -253,10 +228,11 @@ void simulate(Angle& angle, double& time, double& distance)
       // Update the environmental factors
       angle.setRadians(computeAngle(pt.getMetersX(), pt.getMetersY())); 
       double sound = computeSpeedofSound(pt.getMetersY());
+      // Set speed here
+
       double mach = v.getSpeed() / sound;
       double drag = computeDrag(mach);
-      double force = computeDragForce(drag, computeDensity(pt.getMetersY()),
-         v.getSpeed(), area);
+      double force = computeDragForce(drag, computeDensity(pt.getMetersY()), v.getSpeed(), area);
       double gravity = computeGravitationalForce(pt.getMetersY());
 
       // Update the projectile's position, velocity, and acceleration
@@ -268,6 +244,7 @@ void simulate(Angle& angle, double& time, double& distance)
       pt.addMetersY(v.getDY() * TIME + 0.5 * acceleration.getDDY() * TIME * TIME);
       // Update the time passed
       total += TIME;
+      cout <<  "    Alt: " << pt.getMetersY() << "    SoS: " << sound << "     mach: " << mach << "density: " << computeDensity(pt.getMetersY()) << "     drag: " << drag << "    force: " << force << "    gravity: " << gravity << "   Velocity: " << v.getSpeed() <<endl;
       cout << "X: " << pt.getMetersX() << "   Y: " << pt.getMetersY() << endl;
 
    }
@@ -282,8 +259,11 @@ void simulate(Angle& angle, double& time, double& distance)
       distance = pt.getMetersX();
       time = total;
    }
+   cout.setf(ios::fixed | ios::showpoint);
+   cout.precision(1); 
+   cout << "Distance:\t" << pt.getMetersX() << "m \tTime:\t" << total << "s" << endl;  
 }
-
+ 
 int main()
 {
    while (true)
@@ -300,9 +280,7 @@ int main()
       double time = 0.0;
       double distance = 0.0; 
       simulate(angle, time, distance); 
-      cout.setf(ios::fixed | ios::showpoint); 
-      cout.precision(1); 
-      cout << "Distance:\t" << distance << "m \tTime:\t" << time << "s" << endl; 
+      
    }
 
 } 
